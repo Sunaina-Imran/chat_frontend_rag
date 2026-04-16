@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 
-const API_BASE = 'http://localhost:5000/api';
+const API_BASE = 'http://localhost:8000/api';
 
 export const fetchSessions = createAsyncThunk('chat/fetchSessions', async () => {
   const response = await fetch(`${API_BASE}/sessions`);
@@ -41,7 +41,7 @@ export const deleteSession = createAsyncThunk('chat/deleteSession', async (sessi
 const initialState = {
   chats: [],
   activeChatId: null,
-  status: 'idle', 
+  status: 'idle',
   error: null,
   isSending: false
 };
@@ -82,7 +82,7 @@ const chatSlice = createSlice({
         state.status = 'failed';
         state.error = action.error.message;
       })
-      
+
       // createSession
       .addCase(createSession.fulfilled, (state, action) => {
         const newChat = { ...action.payload, messages: [] };
@@ -135,7 +135,7 @@ const chatSlice = createSlice({
 
 export const { setActiveChat, addOptimisticMessage } = chatSlice.actions;
 
-export const selectActiveChat = (state) => 
+export const selectActiveChat = (state) =>
   state.chat.chats.find(c => c._id === state.chat.activeChatId);
 
 export default chatSlice.reducer;
