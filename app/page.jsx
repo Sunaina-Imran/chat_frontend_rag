@@ -13,13 +13,13 @@ export default function Home() {
         // or create a brand-new session if none exist.
         const bootstrap = async () => {
             try {
-                const res = await axios.get("http://localhost:8000/chat/sessions");
+                const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/chat/sessions`);
                 if (res.data && res.data.length > 0) {
                     // Go straight to the most-recent chat
                     router.replace(`/chat/${res.data[0].session_id}`);
                 } else {
                     // No existing chats — create one and navigate to it
-                    const newSession = await axios.post("http://localhost:8000/chat/session");
+                    const newSession = await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/chat/session`);
                     router.replace(`/chat/${newSession.data.session_id}`);
                 }
             } catch {

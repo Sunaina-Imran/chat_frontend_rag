@@ -19,7 +19,7 @@ export default function ChatWindow({ chatId }) {
     const loadMessages = async () => {
       setLoading(true);
       try {
-        const res = await axios.get(`http://localhost:8000/api/messages/${chatId}`);
+        const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/messages/${chatId}`);
         setMessages(res.data);
       } catch (err) {
         console.error(err);

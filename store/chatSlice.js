@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 
-const API_BASE = 'http://localhost:8000/chat';
+const API_BASE = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/chat`;
 
 export const fetchSessions = createAsyncThunk('chat/fetchSessions', async () => {
   const response = await fetch(`${API_BASE}/sessions`);
