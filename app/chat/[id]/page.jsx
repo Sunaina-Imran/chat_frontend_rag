@@ -6,6 +6,7 @@ import { useParams } from "next/navigation";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { useChatRefresh } from "../ChatRefreshContext";
+import FunnelSparkLogo from "../FunnelSparkLogo";
 
 /* ─── Markdown prose styles injected once ─── */
 const MD_STYLES = `
@@ -95,10 +96,11 @@ const ChildChatComponent = () => {
         if (!chatId) return;
         setIsLoading(true);
         try {
-            const response = await axios.get(`http://localhost:8000/api/messages/${chatId}`);
-            setMessages(response.data);
+            const response = await axios.get(`http://localhost:8000/chat/history/${chatId}`);
+            setMessages(response.data.messages || []);
         } catch (error) {
             console.error(error);
+            setMessages([]);
         } finally {
             setIsLoading(false);
         }
@@ -125,19 +127,11 @@ const ChildChatComponent = () => {
                 <style>{MD_STYLES}</style>
                 <div
                     style={{
-                        width: 56, height: 56,
-                        background: "linear-gradient(135deg,#7c6ef7,#5b51cc)",
-                        borderRadius: 16,
                         animation: "naina-loading-pulse 1.8s ease-in-out infinite",
                         display: "flex", alignItems: "center", justifyContent: "center",
                     }}
                 >
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none"
-                        stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                        <circle cx="12" cy="12" r="10" />
-                        <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10
-                                 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-                    </svg>
+                    <FunnelSparkLogo size={112} />
                 </div>
                 <p style={{ fontSize: 15, fontWeight: 500, color: "#8a85b0", margin: 0 }}>
                     Loading conversation…
@@ -169,35 +163,12 @@ const ChildChatComponent = () => {
                 }}
             >
                 <style>{MD_STYLES}</style>
-                <div style={{
-                    width: 56, height: 56,
-                    background: "linear-gradient(135deg,#7c6ef7,#5b51cc)",
-                    borderRadius: 16,
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                }}>
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none"
-                        stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                        <circle cx="12" cy="12" r="10" />
-                        <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10
-                                 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-                    </svg>
-                </div>
+                <FunnelSparkLogo size={112} />
                 <p style={{ fontSize: 20, fontWeight: 600, color: "#e8e6ff", margin: 0 }}>Let&apos;s start!</p>
                 <p style={{ fontSize: 13, color: "#6b6885", textAlign: "center", maxWidth: 260, lineHeight: 1.7, margin: 0 }}>
-                    Hi! I&apos;m nAIna — your intelligent assistant. Send a message to begin.
+                    Hi! I&apos;m Sortix — your intelligent assistant. Send a message to begin.
                 </p>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 8, justifyContent: "center", marginTop: 8 }}>
-                    {["Explain AI in simple terms", "Write a short poem", "Help me brainstorm ideas"].map((s) => (
-                        <div key={s} style={{
-                            background: "#1a1a26", border: "1px solid #2d2d45",
-                            borderRadius: 20, padding: "6px 14px",
-                            fontSize: 12, color: "#9590b8", cursor: "pointer",
-                        }}
-                            onMouseEnter={e => { e.currentTarget.style.borderColor = "#7c6ef7"; e.currentTarget.style.color = "#c4beff"; }}
-                            onMouseLeave={e => { e.currentTarget.style.borderColor = "#2d2d45"; e.currentTarget.style.color = "#9590b8"; }}
-                        >{s}</div>
-                    ))}
-                </div>
+
             </div>
         );
     }
@@ -217,6 +188,7 @@ const ChildChatComponent = () => {
 
             {messages.map((msg, idx) => {
                 const isUser = msg.role === "user";
+                const sources = msg.sources || [];
                 return (
                     <div
                         key={idx}
@@ -231,23 +203,18 @@ const ChildChatComponent = () => {
                             width: 28, height: 28, borderRadius: 8, flexShrink: 0,
                             background: isUser
                                 ? "#1f2a4a"
-                                : "linear-gradient(135deg,#7c6ef7,#5b51cc)",
+                                : "transparent",
                             display: "flex", alignItems: "center", justifyContent: "center",
                             fontSize: 11, fontWeight: 600,
                             color: isUser ? "#6ea0e8" : "#fff",
                         }}>
                             {isUser ? "U" : (
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
-                                    stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                    <circle cx="12" cy="12" r="10" />
-                                    <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10
-                                             15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-                                </svg>
+                                <FunnelSparkLogo size={28} />
                             )}
                         </div>
 
-                        {/* Bubble */}
-                        <div style={{ maxWidth: "76%" }}>
+                        {/* Bubble + Sources */}
+                        <div style={{ maxWidth: "76%", display: "flex", flexDirection: "column", gap: 6 }}>
                             <div style={{
                                 padding: "10px 14px",
                                 borderRadius: 14,
@@ -270,6 +237,36 @@ const ChildChatComponent = () => {
                                     </div>
                                 )}
                             </div>
+
+                            {/* Source citations for assistant messages */}
+                            {!isUser && sources.length > 0 && (
+                                <div style={{
+                                    display: "flex", flexWrap: "wrap", gap: 6,
+                                    paddingLeft: 4,
+                                }}>
+                                    {sources.map((src, sidx) => (
+                                        <div
+                                            key={sidx}
+                                            title={src.text_excerpt || src.source}
+                                            style={{
+                                                fontSize: 10, color: "#9b8ef5",
+                                                background: "rgba(108,95,232,.1)",
+                                                border: "1px solid rgba(108,95,232,.25)",
+                                                borderRadius: 12,
+                                                padding: "2px 8px",
+                                                cursor: "help",
+                                                maxWidth: 180,
+                                                overflow: "hidden",
+                                                textOverflow: "ellipsis",
+                                                whiteSpace: "nowrap",
+                                            }}
+                                        >
+                                            [{src.reference_id}] {src.source}
+                                            {src.page ? ` p.${src.page}` : ""}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
                         </div>
                     </div>
                 );

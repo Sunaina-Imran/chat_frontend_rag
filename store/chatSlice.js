@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 
-const API_BASE = 'http://localhost:8000/api';
+const API_BASE = 'http://localhost:8000/chat';
 
 export const fetchSessions = createAsyncThunk('chat/fetchSessions', async () => {
   const response = await fetch(`${API_BASE}/sessions`);
@@ -15,21 +15,21 @@ export const createSession = createAsyncThunk('chat/createSession', async () => 
 });
 
 export const fetchMessages = createAsyncThunk('chat/fetchMessages', async (sessionId) => {
-  const response = await fetch(`${API_BASE}/messages/${sessionId}`);
+  const response = await fetch(`${API_BASE}/history/${sessionId}`);
   if (!response.ok) throw new Error('Failed to fetch messages');
   const data = await response.json();
-  return { sessionId, messages: data };
+  return { sessionId, messages: data.messages || [] };
 });
 
-export const sendMessage = createAsyncThunk('chat/sendMessage', async ({ sessionId, message }) => {
+export const sendMessage = createAsyncThunk('chat/sendMessage', async ({ sessionId, message, doc_ids = [] }) => {
   const response = await fetch(`${API_BASE}/message`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ sessionId, message })
+    body: JSON.stringify({ session_id: sessionId, message, doc_ids })
   });
   if (!response.ok) throw new Error('Failed to send message');
   const data = await response.json();
-  return { sessionId, userMessage: message, reply: data.reply };
+  return { sessionId, userMessage: message, reply: data.answer };
 });
 
 export const deleteSession = createAsyncThunk('chat/deleteSession', async (sessionId) => {
@@ -73,9 +73,9 @@ const chatSlice = createSlice({
       .addCase(fetchSessions.pending, (state) => { state.status = 'loading'; })
       .addCase(fetchSessions.fulfilled, (state, action) => {
         state.status = 'succeeded';
-        state.chats = action.payload.map(chat => ({ ...chat, messages: chat.messages || [] }));
+        state.chats = action.payload.map(chat => ({ ...chat, _id: chat.session_id, messages: chat.messages || [] }));
         if (!state.activeChatId && action.payload.length > 0) {
-          state.activeChatId = action.payload[0]._id;
+          state.activeChatId = action.payload[0].session_id;
         }
       })
       .addCase(fetchSessions.rejected, (state, action) => {
@@ -85,10 +85,11 @@ const chatSlice = createSlice({
 
       // createSession
       .addCase(createSession.fulfilled, (state, action) => {
-        const newChat = { ...action.payload, messages: [] };
+        const payload = action.payload;
+        const newChat = { ...payload, _id: payload.session_id, messages: [] };
         // Place new chat at index 0 (recent)
         state.chats.unshift(newChat);
-        state.activeChatId = newChat._id;
+        state.activeChatId = newChat.session_id;
       })
 
       // fetchMessages
