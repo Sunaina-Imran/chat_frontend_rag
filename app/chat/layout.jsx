@@ -26,8 +26,24 @@ function ChatLayoutInner({ children }) {
     const [isUploading, setIsUploading] = useState(false);
     const [uploadError, setUploadError] = useState("");
     const [selectedDocs, setSelectedDocs] = useState([]);
+    const [rightOpen, setRightOpen] = useState(true);
     const [allDocsCount, setAllDocsCount] = useState(0);
     const fileInputRef = useRef(null);
+    const [isMobile, setIsMobile] = useState(false);
+    const [leftOpen, setLeftOpen] = useState(false);
+    const initialized = useRef(false);
+
+    useEffect(() => {
+        if (!initialized.current) {
+            initialized.current = true;
+            const mobile = window.innerWidth < 768;
+            setIsMobile(mobile);
+            setRightOpen(!mobile);
+        }
+        const handleResize = () => setIsMobile(window.innerWidth < 768);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     const router = useRouter();
     const pathname = usePathname();
@@ -252,23 +268,40 @@ function ChatLayoutInner({ children }) {
     const RightPanel = () => {
 
         return (
-            <aside style={{
-                width: 310,
-                background: "#13131a",
-                borderLeft: "1px solid #1e1e2a",
-                display: "flex",
-                flexDirection: "column",
-                flexShrink: 0,
-            }}>
-                {/* ── Header ── */}
-                <div style={{ padding: "14px 14px 10px", borderBottom: "1px solid #1a1a26" }}>
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7a76a0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="18" x2="21" y2="18" />
-                            </svg>
-                            <span style={{ fontSize: 14, fontWeight: 600, color: "#c4beff" }}>Knowledge Base</span>
-                        </div>
+            <>
+                {isMobile && rightOpen && (
+                    <div onClick={() => setRightOpen(false)} style={{
+                        position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
+                        background: "rgba(0,0,0,0.5)", zIndex: 40
+                    }} />
+                )}
+                <aside style={{
+                    width: rightOpen ? 310 : 0,
+                    background: "#13131a",
+                    borderLeft: rightOpen ? "1px solid #1e1e2a" : "none",
+                    display: "flex",
+                    flexDirection: "column",
+                    flexShrink: 0,
+                    transition: "width 0.3s ease",
+                    overflow: "hidden",
+                    position: isMobile ? "fixed" : "relative",
+                    right: isMobile ? 0 : undefined,
+                    top: isMobile ? 0 : undefined,
+                    height: isMobile ? "100vh" : undefined,
+                    zIndex: isMobile ? 50 : undefined,
+                }}>
+                    <div style={{ width: 310, minWidth: 310, display: "flex", flexDirection: "column", flex: 1 }}>
+                        {/* ── Header ── */}
+                        <div style={{ padding: "14px 14px 10px", borderBottom: "1px solid #1a1a26" }}>
+                            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+                                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                                    <div onClick={() => setRightOpen(false)} style={{ cursor: "pointer" }}>
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7a76a0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                            <line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="18" x2="21" y2="18" />
+                                        </svg>
+                                    </div>
+                                    <span style={{ fontSize: 14, fontWeight: 600, color: "#c4beff" }}>Knowledge Base</span>
+                                </div>
                         {chatId && (
                             <span style={{
                                 fontSize: 10, fontWeight: 500, color: "#4ec87a",
@@ -471,7 +504,29 @@ function ChatLayoutInner({ children }) {
                         </div>
                     )}
                 </div>
-            </aside>
+                    </div>
+                </aside>
+                {!rightOpen && !isMobile && (
+                    <div 
+                        onClick={() => setRightOpen(true)}
+                        style={{
+                            width: 36,
+                            background: "#13131a",
+                            borderLeft: "1px solid #1e1e2a",
+                            display: "flex",
+                            alignItems: "flex-start",
+                            justifyContent: "center",
+                            paddingTop: 14,
+                            flexShrink: 0,
+                            cursor: "pointer",
+                        }}
+                    >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7a76a0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="18" x2="21" y2="18" />
+                        </svg>
+                    </div>
+                )}
+            </>
         );
     };
 
@@ -480,7 +535,26 @@ function ChatLayoutInner({ children }) {
             <style>{spinnerStyle}</style>
 
             {/* ── Left Sidebar ── */}
-            <aside style={{ width: 268, background: "#13131a", borderRight: "1px solid #1e1e2a", display: "flex", flexDirection: "column", flexShrink: 0 }}>
+            {isMobile && leftOpen && (
+                <div onClick={() => setLeftOpen(false)} style={{
+                    position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
+                    background: "rgba(0,0,0,0.5)", zIndex: 40
+                }} />
+            )}
+            <aside style={{
+                width: 268,
+                background: "#13131a",
+                borderRight: "1px solid #1e1e2a",
+                display: "flex",
+                flexDirection: "column",
+                flexShrink: 0,
+                position: isMobile ? "fixed" : "relative",
+                left: isMobile ? (leftOpen ? 0 : -268) : 0,
+                top: 0,
+                height: "100vh",
+                zIndex: isMobile ? 50 : undefined,
+                transition: isMobile ? "left 0.3s ease" : "none",
+            }}>
 
                 <div style={{ padding: "16px 14px 12px" }}>
                     {/* Brand */}
@@ -593,6 +667,13 @@ function ChatLayoutInner({ children }) {
             <main style={{ flex: 1, display: "flex", flexDirection: "column", background: "#0d0d11", minWidth: 0 }}>
                 {/* Header */}
                 <div style={{ padding: "13px 20px", borderBottom: "1px solid #1e1e2a", display: "flex", alignItems: "center", gap: 12 }}>
+                    {isMobile && (
+                        <button onClick={() => setLeftOpen(true)} style={{ background: "none", border: "none", cursor: "pointer", color: "#c4beff", padding: 4, display: "flex", alignItems: "center" }}>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="18" x2="21" y2="18" />
+                            </svg>
+                        </button>
+                    )}
                     {/* ── Logo: Funnel + Spark ── */}
                     <FunnelSparkLogo size={36} />
                     <div>
@@ -603,17 +684,26 @@ function ChatLayoutInner({ children }) {
                         </p>
                     </div>
 
-                    {/* RAG indicator in header */}
-                    {docs.length > 0 && chatId && (
-                        <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 6, background: "rgba(108,95,232,.1)", border: "1px solid rgba(108,95,232,.25)", borderRadius: 20, padding: "4px 10px" }}>
-                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#9b8ef5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96-.46 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3zM14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96-.46 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3z" />
-                            </svg>
-                            <span style={{ fontSize: 10.5, color: "#9b8ef5", fontWeight: 500 }}>
-                                {selectedDocs.length > 0 ? `${selectedDocs.length} selected` : `${docs.length} doc${docs.length !== 1 ? "s" : ""}`}
-                            </span>
-                        </div>
-                    )}
+                    <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 8 }}>
+                        {/* RAG indicator in header */}
+                        {docs.length > 0 && chatId && (
+                            <div style={{ display: "flex", alignItems: "center", gap: 6, background: "rgba(108,95,232,.1)", border: "1px solid rgba(108,95,232,.25)", borderRadius: 20, padding: "4px 10px" }}>
+                                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#9b8ef5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96-.46 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3zM14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96-.46 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3z" />
+                                </svg>
+                                <span style={{ fontSize: 10.5, color: "#9b8ef5", fontWeight: 500 }}>
+                                    {selectedDocs.length > 0 ? `${selectedDocs.length} selected` : `${docs.length} doc${docs.length !== 1 ? "s" : ""}`}
+                                </span>
+                            </div>
+                        )}
+                        {isMobile && (
+                            <button onClick={() => setRightOpen(true)} style={{ background: "none", border: "none", cursor: "pointer", color: "#c4beff", padding: 4, display: "flex", alignItems: "center" }}>
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+                                </svg>
+                            </button>
+                        )}
+                    </div>
                 </div>
 
                 <div style={{ flex: 1, overflowY: "auto" }}>{children}</div>
