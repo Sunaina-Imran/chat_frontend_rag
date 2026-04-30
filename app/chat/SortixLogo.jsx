@@ -1,40 +1,102 @@
-// Shared Sortix brand logo — Funnel + Sparkles SVG
-export default function SortixLogo({ size = 34 }) {
+import React from 'react';
+
+// Shared Sortix brand logo — Modern 3D Spiky Star Design
+export default function SortixLogo({ size = 32, className = "", style = {} }) {
     return (
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 680" width={size} height={size} style={{ flexShrink: 0 }}>
+        <svg 
+            width={size} 
+            height={size} 
+            viewBox="0 0 100 100" 
+            className={className}
+            style={{ 
+                filter: "drop-shadow(0 4px 12px rgba(232,115,74,0.4))",
+                flexShrink: 0,
+                ...style 
+            }}
+            fill="none" 
+            xmlns="http://www.w3.org/2000/svg"
+        >
             <defs>
-                <linearGradient id="funnelG" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor="#7c3aed" />
-                    <stop offset="100%" stopColor="#2563eb" />
+                {/* Outer glowing ring gradient */}
+                <radialGradient id="ringGlow" cx="50%" cy="50%" r="50%">
+                    <stop offset="85%" stopColor="#e8734a" stopOpacity="0" />
+                    <stop offset="95%" stopColor="#e8734a" stopOpacity="1" />
+                    <stop offset="100%" stopColor="#ffcc80" stopOpacity="0.8" />
+                </radialGradient>
+                
+                {/* Darker base gradient for spikes */}
+                <linearGradient id="spikeBase" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#ffb347" />
+                    <stop offset="50%" stopColor="#e8734a" />
+                    <stop offset="100%" stopColor="#7a2e0e" />
                 </linearGradient>
-                <linearGradient id="sparkG" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor="#fcd34d" />
-                    <stop offset="100%" stopColor="#f97316" />
+
+                {/* Lighter highlight gradient for spikes to give 3D bevel */}
+                <linearGradient id="spikeHighlight" x1="100%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stopColor="#ffe6b3" />
+                    <stop offset="40%" stopColor="#ffb347" />
+                    <stop offset="100%" stopColor="#c24a15" />
                 </linearGradient>
+                
+                {/* Center glowing core */}
+                <radialGradient id="centerCore" cx="40%" cy="30%" r="60%">
+                    <stop offset="0%" stopColor="#ffffff" />
+                    <stop offset="20%" stopColor="#ffe6b3" />
+                    <stop offset="60%" stopColor="#e8734a" />
+                    <stop offset="100%" stopColor="#541b05" />
+                </radialGradient>
+
+                {/* 3D Drop shadow for the inner star */}
+                <filter id="starShadow" x="-20%" y="-20%" width="140%" height="140%">
+                    <feDropShadow dx="2" dy="5" stdDeviation="4" floodColor="#000000" floodOpacity="0.7"/>
+                    <feDropShadow dx="-1" dy="-2" stdDeviation="2" floodColor="#e8734a" floodOpacity="0.4"/>
+                </filter>
             </defs>
-            {/* Background */}
-            <circle cx="340" cy="340" r="305" fill="#0f0c29" />
-            <circle cx="340" cy="340" r="298" fill="none" stroke="#7c3aed" strokeWidth="5" opacity="0.5" />
-            {/* Funnel body */}
-            <path d="M153 197 L527 197 L402 356 L402 502 L278 502 Z" fill="url(#funnelG)" opacity="0.93" />
-            <path d="M153 197 L527 197 L402 356 L278 356 Z" fill="#9f7aea" opacity="0.4" />
-            <path d="M153 197 L527 197 L402 356 L402 502 L278 502 L278 356 Z" fill="none" stroke="#a78bfa" strokeWidth="6" opacity="0.65" />
-            {/* Filter lines */}
-            <line x1="221" y1="244" x2="459" y2="244" stroke="#c4b5fd" strokeWidth="7" strokeLinecap="round" opacity="0.7" />
-            <line x1="255" y1="282" x2="425" y2="282" stroke="#c4b5fd" strokeWidth="6" strokeLinecap="round" opacity="0.5" />
-            <line x1="292" y1="320" x2="388" y2="320" stroke="#c4b5fd" strokeWidth="5" strokeLinecap="round" opacity="0.35" />
-            {/* Drip */}
-            <ellipse cx="340" cy="502" rx="27" ry="17" fill="#6d28d9" opacity="0.7" />
-            <path d="M326 502 Q340 550 354 502" fill="#5b21b6" opacity="0.85" />
-            {/* Main sparkle */}
-            <path d="M516 177 L527 150 L538 177 L565 188 L538 199 L527 226 L516 199 L489 188 Z" fill="url(#sparkG)" />
-            {/* Small sparkles */}
-            <path d="M136 306 L143 292 L150 306 L164 313 L150 320 L143 334 L136 320 L122 313 Z" fill="#fcd34d" opacity="0.75" />
-            <path d="M156 468 L163 452 L170 468 L186 476 L170 484 L163 500 L156 484 L140 476 Z" fill="#60a5fa" opacity="0.65" />
-            {/* Dot cluster */}
-            <circle cx="544" cy="272" r="9" fill="#fbbf24" opacity="0.9" />
-            <circle cx="503" cy="231" r="6" fill="#f97316" opacity="0.7" />
-            <circle cx="561" cy="232" r="5" fill="#fcd34d" opacity="0.6" />
+
+            {/* The outer glowing orange ring */}
+            <circle cx="50" cy="50" r="46" fill="url(#ringGlow)" />
+            <circle cx="50" cy="50" r="46" stroke="#ffb347" strokeWidth="1.5" strokeOpacity="0.9" />
+            <circle cx="50" cy="50" r="47" stroke="#e8734a" strokeWidth="0.5" strokeOpacity="0.5" />
+
+            <g filter="url(#starShadow)">
+                {/* Back Layer Spikes (Diagonal) */}
+                <polygon points="50,50 85,15 60,50" fill="url(#spikeBase)" />
+                <polygon points="50,50 85,85 50,60" fill="url(#spikeBase)" />
+                <polygon points="50,50 15,85 40,50" fill="url(#spikeBase)" />
+                <polygon points="50,50 15,15 50,40" fill="url(#spikeBase)" />
+
+                <polygon points="50,50 85,15 50,40" fill="url(#spikeHighlight)" />
+                <polygon points="50,50 85,85 60,50" fill="url(#spikeHighlight)" />
+                <polygon points="50,50 15,85 50,60" fill="url(#spikeHighlight)" />
+                <polygon points="50,50 15,15 40,50" fill="url(#spikeHighlight)" />
+
+                {/* Middle Layer Spikes (Cross) */}
+                <polygon points="50,50 50,8 60,50" fill="url(#spikeBase)" />
+                <polygon points="50,50 92,50 50,60" fill="url(#spikeBase)" />
+                <polygon points="50,50 50,92 40,50" fill="url(#spikeBase)" />
+                <polygon points="50,50 8,50 50,40" fill="url(#spikeBase)" />
+
+                <polygon points="50,50 50,8 40,50" fill="url(#spikeHighlight)" />
+                <polygon points="50,50 92,50 50,40" fill="url(#spikeHighlight)" />
+                <polygon points="50,50 50,92 60,50" fill="url(#spikeHighlight)" />
+                <polygon points="50,50 8,50 50,60" fill="url(#spikeHighlight)" />
+
+                {/* Front Layer Spikes (Rotated slightly) */}
+                <g transform="rotate(22.5 50 50)">
+                    <polygon points="50,50 50,18 56,50" fill="url(#spikeBase)" />
+                    <polygon points="50,50 82,50 50,56" fill="url(#spikeBase)" />
+                    <polygon points="50,50 50,82 44,50" fill="url(#spikeBase)" />
+                    <polygon points="50,50 18,50 50,44" fill="url(#spikeBase)" />
+
+                    <polygon points="50,50 50,18 44,50" fill="url(#spikeHighlight)" />
+                    <polygon points="50,50 82,50 50,44" fill="url(#spikeHighlight)" />
+                    <polygon points="50,50 50,82 56,50" fill="url(#spikeHighlight)" />
+                    <polygon points="50,50 18,50 50,56" fill="url(#spikeHighlight)" />
+                </g>
+
+                {/* Central Sphere Core */}
+                <circle cx="50" cy="50" r="14" fill="url(#centerCore)" />
+            </g>
         </svg>
     );
 }

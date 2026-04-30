@@ -50,7 +50,7 @@ export default function Home() {
         bootstrap();
     }, [router]);
 
-    // Minimal splash while redirecting
+    // Minimal splash while redirecting — themed with Sora orange
     return (
         <div
             style={{
@@ -59,28 +59,29 @@ export default function Home() {
                 alignItems: "center",
                 justifyContent: "center",
                 height: "100vh",
-                background: "#0d0d11",
+                background: "#0e0d0c",
                 gap: 16,
-                fontFamily: "system-ui, sans-serif",
+                fontFamily: "'Sora', sans-serif",
             }}
         >
             <style>{`
                 @keyframes spin { to { transform: rotate(360deg); } }
+                @keyframes pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
             `}</style>
 
             {/* Brand icon — Sortix logo at 2× size */}
-            <SortixLogo size={104} />
+            <SortixLogo size={112} style={{ animation: "pulse 2s infinite ease-in-out" }} />
 
-            <p style={{ fontSize: 15, fontWeight: 500, color: "#8a85b0", margin: 0 }}>
+            <p style={{ fontSize: 16, fontWeight: 600, color: "#f0ece6", margin: 0, letterSpacing: "0.02em" }}>
                 Starting Sortix…
             </p>
 
-            {/* Spinner */}
+            {/* Spinner — Orange themed */}
             <div
                 style={{
-                    width: 20, height: 20,
-                    border: "2px solid rgba(108,95,232,.2)",
-                    borderTopColor: "#7c6ef7",
+                    width: 24, height: 24,
+                    border: "3px solid rgba(232,115,74,0.15)",
+                    borderTopColor: "#e8734a",
                     borderRadius: "50%",
                     animation: "spin .7s linear infinite",
                 }}
