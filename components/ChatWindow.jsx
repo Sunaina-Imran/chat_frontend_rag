@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useRef } from "react";
-import axios from "axios";
+import api from "@/lib/api";
 import Message from "./Message";
 import InputBox from "./InputBox";
 import { ScrollArea } from "./ui/scroll-area";
@@ -19,7 +19,7 @@ export default function ChatWindow({ chatId }) {
     const loadMessages = async () => {
       setLoading(true);
       try {
-        const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/messages/${chatId}`);
+        const res = await api.get(`/chat/history/${chatId}`);
         setMessages(res.data);
       } catch (err) {
         console.error(err);

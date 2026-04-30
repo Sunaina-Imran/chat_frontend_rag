@@ -1,5 +1,5 @@
 // Shared Sortix brand logo — Funnel + Sparkles SVG
-export default function FunnelSparkLogo({ size = 34 }) {
+export default function SortixLogo({ size = 34 }) {
     return (
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 680" width={size} height={size} style={{ flexShrink: 0 }}>
             <defs>

@@ -1,41 +1,41 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import axios from "axios";
+import api from "@/lib/api";
 import { useParams } from "next/navigation";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { useChatRefresh } from "../ChatRefreshContext";
-import FunnelSparkLogo from "../FunnelSparkLogo";
+import SortixLogo from "../SortixLogo";
 
 /* ─── Markdown prose styles injected once ─── */
 const MD_STYLES = `
-    .md-prose { line-height: 1.7; color: #ccc9e8; font-size: 13.5px; word-break: break-word; }
+    .md-prose { line-height: 1.7; color: #d1d1d6; font-size: 13.5px; word-break: break-word; }
     .md-prose p  { margin: 0 0 8px; }
     .md-prose p:last-child { margin-bottom: 0; }
     .md-prose h1,.md-prose h2,.md-prose h3,.md-prose h4 {
-        color: #e8e6ff; font-weight: 600; margin: 14px 0 6px;
+        color: #e2e2e8; font-weight: 600; margin: 14px 0 6px;
     }
     .md-prose h1 { font-size: 18px; }
     .md-prose h2 { font-size: 16px; }
     .md-prose h3 { font-size: 14.5px; }
     .md-prose ul,.md-prose ol { margin: 6px 0 8px 18px; padding: 0; }
     .md-prose li { margin-bottom: 4px; }
-    .md-prose strong { color: #e8e6ff; font-weight: 600; }
+    .md-prose strong { color: #e2e2e8; font-weight: 600; }
     .md-prose em { color: #b8b4d8; font-style: italic; }
-    .md-prose a  { color: #8a7ef0; text-decoration: underline; }
+    .md-prose a  { color: #c2652a; text-decoration: underline; }
     .md-prose a:hover { color: #b0a8ff; }
     .md-prose blockquote {
-        border-left: 3px solid #4a4070;
+        border-left: 3px solid #733a08;
         margin: 8px 0; padding: 6px 12px;
-        color: #9590b8; background: rgba(108,95,232,0.06);
+        color: #9590b8; background: rgba(194,101,42,0.06);
         border-radius: 0 6px 6px 0;
     }
     .md-prose hr { border: none; border-top: 1px solid #2a2a3c; margin: 12px 0; }
     .md-prose table { border-collapse: collapse; width: 100%; margin: 10px 0; font-size: 12.5px; }
     .md-prose th { background: #1e1e30; color: #c4beff; padding: 6px 10px; text-align: left; border: 1px solid #2d2d45; }
     .md-prose td { padding: 5px 10px; border: 1px solid #2d2d45; color: #b8b4d8; }
-    .md-prose tr:nth-child(even) td { background: rgba(108,95,232,0.04); }
+    .md-prose tr:nth-child(even) td { background: rgba(194,101,42,0.04); }
 
     /* Inline code */
     .md-prose code {
@@ -57,7 +57,7 @@ const MD_STYLES = `
         margin: 10px 0;
         overflow-x: auto;
         scrollbar-width: thin;
-        scrollbar-color: rgba(108,95,232,.3) transparent;
+        scrollbar-color: rgba(194,101,42,.3) transparent;
     }
     .md-prose pre code {
         background: none;
@@ -96,7 +96,7 @@ const ChildChatComponent = () => {
         if (!chatId) return;
         setIsLoading(true);
         try {
-            const response = await axios.get(`http://localhost:8000/chat/history/${chatId}`);
+            const response = await api.get(`/chat/history/${chatId}`);
             setMessages(response.data.messages || []);
         } catch (error) {
             console.error(error);
@@ -121,7 +121,7 @@ const ChildChatComponent = () => {
                 style={{
                     display: "flex", flexDirection: "column", alignItems: "center",
                     justifyContent: "center", height: "100%", gap: 16,
-                    background: "#0f0f13", padding: "40px 24px",
+                    background: "#111317", padding: "40px 24px",
                 }}
             >
                 <style>{MD_STYLES}</style>
@@ -131,7 +131,7 @@ const ChildChatComponent = () => {
                         display: "flex", alignItems: "center", justifyContent: "center",
                     }}
                 >
-                    <FunnelSparkLogo size={112} />
+                    <SortixLogo size={112} />
                 </div>
                 <p style={{ fontSize: 15, fontWeight: 500, color: "#8a85b0", margin: 0 }}>
                     Loading conversation…
@@ -159,12 +159,12 @@ const ChildChatComponent = () => {
                 style={{
                     display: "flex", flexDirection: "column", alignItems: "center",
                     justifyContent: "center", height: "100%", gap: 16,
-                    background: "#0f0f13", padding: "40px 24px",
+                    background: "#111317", padding: "40px 24px",
                 }}
             >
                 <style>{MD_STYLES}</style>
-                <FunnelSparkLogo size={112} />
-                <p style={{ fontSize: 20, fontWeight: 600, color: "#e8e6ff", margin: 0 }}>Let&apos;s start!</p>
+                <SortixLogo size={112} />
+                <p style={{ fontSize: 20, fontWeight: 600, color: "#e2e2e8", margin: 0 }}>Let&apos;s start!</p>
                 <p style={{ fontSize: 13, color: "#6b6885", textAlign: "center", maxWidth: 260, lineHeight: 1.7, margin: 0 }}>
                     Hi! I&apos;m Sortix — your intelligent assistant. Send a message to begin.
                 </p>
@@ -178,7 +178,7 @@ const ChildChatComponent = () => {
         <div
             ref={scrollRef}
             style={{
-                height: "100%", background: "#0f0f13",
+                height: "100%", background: "#111317",
                 padding: "20px 20px 10px",
                 display: "flex", flexDirection: "column", gap: 16,
                 overflowY: "auto",
@@ -209,7 +209,7 @@ const ChildChatComponent = () => {
                             color: isUser ? "#6ea0e8" : "#fff",
                         }}>
                             {isUser ? "U" : (
-                                <FunnelSparkLogo size={28} />
+                                <SortixLogo size={28} />
                             )}
                         </div>
 
@@ -220,8 +220,8 @@ const ChildChatComponent = () => {
                                 borderRadius: 14,
                                 borderBottomRightRadius: isUser ? 4 : 14,
                                 borderBottomLeftRadius: isUser ? 14 : 4,
-                                background: isUser ? "#7c6ef7" : "#1c1c28",
-                                color: isUser ? "#f0efff" : "#ccc9e8",
+                                background: isUser ? "#c2652a" : "#1e2024",
+                                color: isUser ? "#f0efff" : "#d1d1d6",
                                 border: isUser ? "none" : "1px solid #2a2a3c",
                                 wordBreak: "break-word",
                             }}>
@@ -249,9 +249,9 @@ const ChildChatComponent = () => {
                                             key={sidx}
                                             title={src.text_excerpt || src.source}
                                             style={{
-                                                fontSize: 10, color: "#9b8ef5",
-                                                background: "rgba(108,95,232,.1)",
-                                                border: "1px solid rgba(108,95,232,.25)",
+                                                fontSize: 10, color: "#f7a66d",
+                                                background: "rgba(194,101,42,.1)",
+                                                border: "1px solid rgba(194,101,42,.25)",
                                                 borderRadius: 12,
                                                 padding: "2px 8px",
                                                 cursor: "help",

@@ -1,40 +1,30 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-
-const API_BASE = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/chat`;
+import api from '@/lib/api';
 
 export const fetchSessions = createAsyncThunk('chat/fetchSessions', async () => {
-  const response = await fetch(`${API_BASE}/sessions`);
-  if (!response.ok) throw new Error('Failed to fetch sessions');
-  return response.json();
+  const response = await api.get('/chat/sessions');
+  return response.data;
 });
 
 export const createSession = createAsyncThunk('chat/createSession', async () => {
-  const response = await fetch(`${API_BASE}/session`, { method: 'POST' });
-  if (!response.ok) throw new Error('Failed to create session');
-  return response.json();
+  const response = await api.post('/chat/session');
+  return response.data;
 });
 
 export const fetchMessages = createAsyncThunk('chat/fetchMessages', async (sessionId) => {
-  const response = await fetch(`${API_BASE}/history/${sessionId}`);
-  if (!response.ok) throw new Error('Failed to fetch messages');
-  const data = await response.json();
-  return { sessionId, messages: data.messages || [] };
+  const response = await api.get(`/chat/history/${sessionId}`);
+  return { sessionId, messages: response.data.messages || [] };
 });
 
 export const sendMessage = createAsyncThunk('chat/sendMessage', async ({ sessionId, message, doc_ids = [] }) => {
-  const response = await fetch(`${API_BASE}/message`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ session_id: sessionId, message, doc_ids })
+  const response = await api.post('/chat/message', {
+    session_id: sessionId, message, doc_ids
   });
-  if (!response.ok) throw new Error('Failed to send message');
-  const data = await response.json();
-  return { sessionId, userMessage: message, reply: data.answer };
+  return { sessionId, userMessage: message, reply: response.data.answer };
 });
 
 export const deleteSession = createAsyncThunk('chat/deleteSession', async (sessionId) => {
-  const response = await fetch(`${API_BASE}/session/${sessionId}`, { method: 'DELETE' });
-  if (!response.ok) throw new Error('Failed to delete session');
+  await api.delete(`/chat/session/${sessionId}`);
   return sessionId;
 });
 

@@ -2,24 +2,43 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import axios from "axios";
-import FunnelSparkLogo from "./chat/FunnelSparkLogo";
+import api from "@/lib/api";
+import SortixLogo from "./chat/SortixLogo";
 
 export default function Home() {
     const router = useRouter();
 
     useEffect(() => {
-        // Try to load existing sessions; redirect to the first one,
-        // or create a brand-new session if none exist.
+        // Check auth
+        const token = localStorage.getItem("token");
+        if (!token) {
+            router.replace("/login");
+            return;
+        }
+
+        // Check if user has a persona first
         const bootstrap = async () => {
             try {
-                const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/chat/sessions`);
+                const personasRes = await api.get("/personas");
+                if (!personasRes.data || personasRes.data.length === 0) {
+                    router.replace("/persona");
+                    return;
+                }
+            } catch {
+                router.replace("/persona");
+                return;
+            }
+
+            // Try to load existing sessions; redirect to the first one,
+            // or create a brand-new session if none exist.
+            try {
+                const res = await api.get("/chat/sessions");
                 if (res.data && res.data.length > 0) {
                     // Go straight to the most-recent chat
                     router.replace(`/chat/${res.data[0].session_id}`);
                 } else {
                     // No existing chats — create one and navigate to it
-                    const newSession = await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/chat/session`);
+                    const newSession = await api.post("/chat/session");
                     router.replace(`/chat/${newSession.data.session_id}`);
                 }
             } catch {
@@ -50,7 +69,7 @@ export default function Home() {
             `}</style>
 
             {/* Brand icon — Sortix logo at 2× size */}
-            <FunnelSparkLogo size={104} />
+            <SortixLogo size={104} />
 
             <p style={{ fontSize: 15, fontWeight: 500, color: "#8a85b0", margin: 0 }}>
                 Starting Sortix…
