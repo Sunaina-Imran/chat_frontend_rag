@@ -58,7 +58,7 @@ export default function ProfilePage() {
 
     const fetchPersonas = async () => {
         try {
-            const res = await api.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/personas`);
+            const res = await api.get(`/personas`);
             setPersonas(res.data || []);
         } catch (err) {
             console.error("Failed to load personas", err);
@@ -98,11 +98,11 @@ export default function ProfilePage() {
 
         try {
             if (editingId) {
-                const res = await api.put(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/personas/${editingId}`, formData);
+                const res = await api.put(`/personas/${editingId}`, formData);
                 setPersonas(prev => prev.map(p => p.persona_id === editingId ? res.data : p));
                 setSuccessMessage("Persona updated successfully!");
             } else {
-                const res = await api.post(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/personas`, formData);
+                const res = await api.post(`/personas`, formData);
                 setPersonas(prev => [res.data, ...prev]);
                 setSuccessMessage("Persona created successfully!");
             }
@@ -126,7 +126,7 @@ export default function ProfilePage() {
         setPersonas(prev => prev.filter(p => p.persona_id !== personaId));
         
         try {
-            await api.delete(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/personas/${personaId}`);
+            await api.delete(`/personas/${personaId}`);
             window.dispatchEvent(new Event('personasUpdated'));
         } catch (err) {
             console.error("Failed to delete persona", err);
