@@ -50,7 +50,8 @@ export default function ProfilePage() {
         output_format: "text",
         citation_preference: "none",
         document_behavior: "standard",
-        restrictions: ""
+        restrictions: "",
+        color: "#F97316"
     };
 
     const [formData, setFormData] = useState(initialFormState);
@@ -215,6 +216,7 @@ export default function ProfilePage() {
                         <table style={{ width: "100%", borderCollapse: "collapse" }}>
                             <thead style={{ background: C.surface2, borderBottom: `1px solid ${C.border2}` }}>
                                 <tr>
+                                    <th style={{ padding: "12px 20px", textAlign: "left", fontSize: 12, fontWeight: 700, color: C.textDim, textTransform: "uppercase", letterSpacing: "0.08em" }}>Theme</th>
                                     <th style={{ padding: "12px 20px", textAlign: "left", fontSize: 12, fontWeight: 700, color: C.textDim, textTransform: "uppercase", letterSpacing: "0.08em" }}>Name</th>
                                     <th style={{ padding: "12px 20px", textAlign: "left", fontSize: 12, fontWeight: 700, color: C.textDim, textTransform: "uppercase", letterSpacing: "0.08em" }}>Profession</th>
                                     <th style={{ padding: "12px 20px", textAlign: "left", fontSize: 12, fontWeight: 700, color: C.textDim, textTransform: "uppercase", letterSpacing: "0.08em" }}>Domain</th>
@@ -224,6 +226,9 @@ export default function ProfilePage() {
                             <tbody>
                                 {personas.map(p => (
                                     <tr key={p.persona_id} style={{ borderBottom: `1px solid ${C.border}`, transition: "background .15s" }} onMouseEnter={e => e.currentTarget.style.background = C.surface2} onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
+                                        <td style={{ padding: "16px 20px" }}>
+                                            <div style={{ width: 14, height: 14, borderRadius: "50%", background: p.color || C.orange, boxShadow: `0 0 10px ${p.color || C.orange}40` }} />
+                                        </td>
                                         <td style={{ padding: "16px 20px", fontSize: 14, color: C.text, fontWeight: 600 }}>{p.persona_name}</td>
                                         <td style={{ padding: "16px 20px", fontSize: 14, color: C.textMuted }}>{p.profession}</td>
                                         <td style={{ padding: "16px 20px", fontSize: 14, color: C.textDim }}>{p.domain || "-"}</td>
@@ -337,6 +342,28 @@ export default function ProfilePage() {
                                             <option value="Hindi">Hindi</option>
                                             <option value="Turkish">Turkish</option>
                                         </select>
+                                    </div>
+                                </div>
+
+                                <div style={{ marginTop: 20 }}>
+                                    <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: C.textDim, marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.08em" }}>Persona Theme Color</label>
+                                    <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                                        <div style={{ position: "relative", width: 44, height: 44, borderRadius: 10, overflow: "hidden", border: `1px solid ${C.border2}`, flexShrink: 0 }}>
+                                            <input
+                                                type="color"
+                                                name="color"
+                                                value={formData.color || "#F97316"}
+                                                onChange={handleInputChange}
+                                                style={{ position: "absolute", top: -5, left: -5, width: 60, height: 60, cursor: "pointer", border: "none", background: "none" }}
+                                            />
+                                        </div>
+                                        <input
+                                            name="color"
+                                            value={formData.color || "#F97316"}
+                                            onChange={handleInputChange}
+                                            placeholder="#HEXCODE"
+                                            style={{ ...inputStyle, flex: 1 }}
+                                        />
                                     </div>
                                 </div>
                             </form>

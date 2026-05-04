@@ -221,6 +221,20 @@ function ChatLayoutInner({ children }) {
         loadSessionPersona();
     }, [chatId]);
 
+    const { triggerRefresh, setCurrentPersona, personaTheme } = useChatRefresh();
+
+    // Sync current persona to context
+    useEffect(() => {
+        if (!selectedPersonaId) {
+            setCurrentPersona(null);
+        } else {
+            const persona = personas.find(p => p.persona_id === selectedPersonaId);
+            if (persona) {
+                setCurrentPersona(persona);
+            }
+        }
+    }, [selectedPersonaId, personas, setCurrentPersona]);
+
     // Auto-save selected persona to session when it changes
     useEffect(() => {
         const saveSessionPersona = async () => {
@@ -283,7 +297,8 @@ function ChatLayoutInner({ children }) {
         }
     }, [selectedDocs, chatId]);
 
-    const { triggerRefresh } = useChatRefresh();
+    const selectedPersona = personas.find(p => p.persona_id === selectedPersonaId);
+
 
     const sendMessage = async () => {
         if (!message.trim() || !effectiveChatId || isSending) return;
@@ -304,6 +319,8 @@ function ChatLayoutInner({ children }) {
                 message: message,
                 doc_ids: selectedDocs.length > 0 ? selectedDocs : undefined,
                 persona_id: selectedPersonaId || undefined,
+                persona_name: selectedPersona?.persona_name,
+                persona_color: selectedPersona?.color
             });
 
             setMessage("");
@@ -362,7 +379,7 @@ function ChatLayoutInner({ children }) {
         pdf: { bg: C.surface, text: "#e06c6c", border: C.border2 },
         csv: { bg: C.surface, text: "#6ec1e4", border: C.border2 },
         md: { bg: C.surface, text: "#d4b86a", border: C.border2 },
-        docx: { bg: C.surface, text: "#9b96cc", border: C.border2 },
+        box: { bg: C.surface, text: "#9b96cc", border: C.border2 },
     };
 
     const currentChatTitle = chats.find(c => c.session_id === chatId)?.title || (effectiveChatId ? "New Chat" : "No chat selected");
@@ -456,19 +473,19 @@ function ChatLayoutInner({ children }) {
                                 disabled={isUploading || !effectiveChatId}
                                 style={{
                                     width: "100%", padding: 12, borderRadius: 12,
-                                    border: isUploading || !effectiveChatId ? `1px solid ${C.border2}` : `1.5px solid ${C.orange}`,
-                                    background: isUploading || !effectiveChatId ? C.surface : C.orangeGlow,
-                                    color: isUploading ? C.textDim : !effectiveChatId ? C.textDim : C.orange,
+                                    border: isUploading || !effectiveChatId ? `1px solid ${C.border2}` : `1.5px solid ${personaTheme.primary}`,
+                                    background: isUploading || !effectiveChatId ? C.surface : personaTheme.glow,
+                                    color: isUploading ? C.textDim : !effectiveChatId ? C.textDim : personaTheme.primary,
                                     fontSize: 13, fontWeight: 600, fontFamily: "'Sora',sans-serif",
                                     cursor: isUploading ? "wait" : !effectiveChatId ? "not-allowed" : "pointer",
                                     display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-                                    transition: "background 0.2s"
+                                    transition: personaTheme.transition
                                 }}
-                                onMouseEnter={e => { if (!isUploading && effectiveChatId) e.currentTarget.style.background = C.orangeGlow2; }}
-                                onMouseLeave={e => { if (!isUploading && effectiveChatId) e.currentTarget.style.background = C.orangeGlow; }}
+                                onMouseEnter={e => { if (!isUploading && effectiveChatId) e.currentTarget.style.background = personaTheme.glow; }}
+                                onMouseLeave={e => { if (!isUploading && effectiveChatId) e.currentTarget.style.background = personaTheme.glow; }}
                             >
                                 {isUploading ? (
-                                    <div style={{ width: 14, height: 14, border: `2px solid ${C.orangeGlow}`, borderTopColor: C.orange, borderRadius: "50%", animation: "naina-spin .6s linear infinite" }} />
+                                    <div style={{ width: 14, height: 14, border: `2px solid ${personaTheme.glow}`, borderTopColor: personaTheme.primary, borderRadius: "50%", animation: "naina-spin .6s linear infinite" }} />
                                 ) : (
                                     <span>↑ Upload document to this chat</span>
                                 )}
@@ -505,12 +522,12 @@ function ChatLayoutInner({ children }) {
             }}>
                 <div style={{ padding: "16px 16px 12px", borderBottom: `1px solid ${C.border}`, display: "flex", alignItems: "center", gap: 10 }}>
                     <SortixLogo size={28} />
-                    <span style={{ fontSize: 15, fontWeight: 600 }}>Sortix</span>
+                    <span style={{ fontSize: 15, fontWeight: 600 }}>Sortix AI</span>
                 </div>
 
-                <button onClick={handleNewChat} disabled={isCreating} style={{ margin: 12, padding: "10px 14px", background: C.orange, border: "none", borderRadius: 12, color: "#fff", fontSize: 13, fontWeight: 600, fontFamily: "'Sora',sans-serif", cursor: isCreating ? "wait" : "pointer", display: "flex", alignItems: "center", gap: 8, opacity: isCreating ? 0.8 : 1 }}
-                    onMouseEnter={e => { if (!isCreating) e.currentTarget.style.background = "#f07d55"; }}
-                    onMouseLeave={e => { if (!isCreating) e.currentTarget.style.background = C.orange; }}
+                <button onClick={handleNewChat} disabled={isCreating} style={{ margin: 12, padding: "10px 14px", background: personaTheme.primary, border: "none", borderRadius: 12, color: "#fff", fontSize: 13, fontWeight: 600, fontFamily: "'Sora',sans-serif", cursor: isCreating ? "wait" : "pointer", display: "flex", alignItems: "center", gap: 8, opacity: isCreating ? 0.8 : 1, transition: personaTheme.transition }}
+                    onMouseEnter={e => { if (!isCreating) e.currentTarget.style.opacity = 0.9; }}
+                    onMouseLeave={e => { if (!isCreating) e.currentTarget.style.opacity = 1; }}
                 >
                     <span>+</span> {isCreating ? "Creating..." : "New chat"}
                     {!isCreating && <span style={{ marginLeft: "auto", fontSize: 10, color: "rgba(255,255,255,0.5)", background: "rgba(255,255,255,0.1)", borderRadius: 4, padding: "2px 5px", fontFamily: "monospace" }}>⌘N</span>}
@@ -522,8 +539,14 @@ function ChatLayoutInner({ children }) {
                     {chats.map((chat) => {
                         const sid = chat.session_id;
                         const isActive = sid === chatId;
+                        
                         return (
-                            <div key={sid} onClick={() => router.push(`/chat/${sid}`)} className="group" style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 10px", borderRadius: 10, cursor: "pointer", background: isActive ? C.surface : "transparent", border: isActive ? `1px solid ${C.border2}` : "1px solid transparent", transition: "background .12s" }}
+                            <div key={sid} onClick={() => router.push(`/chat/${sid}`)} className="group" style={{ 
+                                display: "flex", alignItems: "center", gap: 8, padding: "8px 10px", borderRadius: 10, cursor: "pointer", 
+                                background: isActive ? C.surface : "transparent", 
+                                border: isActive ? `1px solid ${C.border2}` : "1px solid transparent", 
+                                transition: "all .12s" 
+                            }}
                                 onMouseEnter={e => { if (!isActive) e.currentTarget.style.background = C.surface2; }}
                                 onMouseLeave={e => { if (!isActive) e.currentTarget.style.background = "transparent"; }}
                             >
@@ -549,7 +572,7 @@ function ChatLayoutInner({ children }) {
                         <div style={{ fontSize: 11, color: C.textMuted, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{user?.email}</div>
                     </div>
                     <button onClick={(e) => { e.stopPropagation(); setIsSignOutModalOpen(true); }} title="Sign out" style={{ background: "none", border: "none", color: C.textDim, cursor: "pointer", padding: 6, borderRadius: 6, display: "flex", transition: "color 0.2s" }}
-                        onMouseEnter={e => { e.currentTarget.style.color = C.orange; e.currentTarget.style.background = C.orangeGlow; }}
+                        onMouseEnter={e => { e.currentTarget.style.color = personaTheme.primary; e.currentTarget.style.background = personaTheme.glow; }}
                         onMouseLeave={e => { e.currentTarget.style.color = C.textDim; e.currentTarget.style.background = "none"; }}
                     >
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -561,7 +584,21 @@ function ChatLayoutInner({ children }) {
 
             <main style={{ flex: 1, display: "flex", flexDirection: "column", background: C.bg2, minWidth: 0 }}>
                 {pathname !== "/chat/profile" && (
-                    <div style={{ padding: "14px 20px", borderBottom: `1px solid ${C.border}`, display: "flex", alignItems: "center", gap: 12, background: C.bg2 }}>
+                    <div style={{ 
+                        padding: "14px 20px", 
+                        borderBottom: `1px solid ${C.border}`, 
+                        display: "flex", alignItems: "center", gap: 12, 
+                        background: C.bg2,
+                        position: "relative"
+                    }}>
+                        {/* Persona Color Accent Border */}
+                        <div style={{ 
+                            position: "absolute", bottom: -1, left: 0, right: 0, height: 2, 
+                            background: `linear-gradient(90deg, transparent, ${personaTheme.primary}, transparent)`,
+                            opacity: selectedPersona ? 1 : 0,
+                            transition: personaTheme.transition
+                        }} />
+
                         {isMobile && (
                             <button onClick={() => setLeftOpen(true)} style={{ background: "none", border: "none", cursor: "pointer", color: C.textMuted, padding: 4, display: "flex", alignItems: "center" }}>
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -569,27 +606,41 @@ function ChatLayoutInner({ children }) {
                                 </svg>
                             </button>
                         )}
-                        <SortixLogo size={32} />
+                        <SortixLogo size={32} color={personaTheme.primary} />
                         <div>
-                            <div style={{ fontSize: 14, fontWeight: 600 }}>Sortix</div>
-                            <div style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 11, color: "#4caf82" }}>
-                                <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#4caf82", animation: "naina-pulse 2s infinite" }} />
-                                Online
+                            <div style={{ fontSize: 14, fontWeight: 600 }}>
+                                {selectedPersona ? selectedPersona.persona_name : "Sortix AI"}
+                            </div>
+                            <div style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 11, color: personaTheme.primary }}>
+                                <div style={{ width: 6, height: 6, borderRadius: "50%", background: personaTheme.primary, animation: "naina-pulse 2s infinite" }} />
+                                {selectedPersona ? selectedPersona.profession : "Online"}
                             </div>
                         </div>
 
                         <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 8 }}>
                             {personas.length > 0 && (
                                 <div style={{ position: "relative" }}>
-                                    <select value={selectedPersonaId || ""} onChange={(e) => setSelectedPersonaId(e.target.value || null)}
-                                        style={{ background: C.orangeGlow, border: `1px solid ${C.orangeGlow2}`, borderRadius: 20, padding: "6px 28px 6px 12px", color: C.orange, fontSize: 12, fontWeight: 600, fontFamily: "'Sora', sans-serif", cursor: "pointer", appearance: "none", outline: "none" }}
+                                    <select 
+                                        value={selectedPersonaId || ""} 
+                                        onChange={(e) => setSelectedPersonaId(e.target.value || null)}
+                                        style={{ 
+                                            background: personaTheme.glow, 
+                                            border: `1px solid ${personaTheme.border}`, 
+                                            borderRadius: 20, padding: "6px 28px 6px 12px", 
+                                            color: personaTheme.primary, 
+                                            fontSize: 12, fontWeight: 600, fontFamily: "'Sora', sans-serif", 
+                                            cursor: "pointer", appearance: "none", outline: "none",
+                                            transition: personaTheme.transition
+                                        }}
                                     >
                                         <option value="" style={{ background: C.surface, color: C.text }}>Default persona</option>
                                         {personas.map((p) => (
-                                            <option key={p.persona_id} value={p.persona_id} style={{ background: C.surface, color: C.text }}>{p.persona_name}</option>
+                                            <option key={p.persona_id} value={p.persona_id} style={{ background: C.surface, color: C.text }}>
+                                                {p.persona_name}
+                                            </option>
                                         ))}
                                     </select>
-                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke={C.orange} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }}>
+                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke={personaTheme.primary} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }}>
                                         <polyline points="6 9 12 15 18 9" />
                                     </svg>
                                 </div>
@@ -604,9 +655,9 @@ function ChatLayoutInner({ children }) {
 
                 {pathname !== "/chat/profile" && (
                     <div style={{ padding: "14px 20px", borderTop: `1px solid ${C.border}`, background: C.bg2 }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: 10, background: C.surface, border: `1px solid ${C.border2}`, borderRadius: 16, padding: "6px 10px", transition: "border-color 0.2s, box-shadow 0.2s" }}>
-                            <button style={{ background: "none", border: "none", color: C.textDim, cursor: "pointer", padding: 6, borderRadius: 6, display: "flex" }} title="Attach Document"
-                                onMouseEnter={e => { e.currentTarget.style.color = C.orange; e.currentTarget.style.background = C.orangeGlow; }}
+                        <div style={{ display: "flex", alignItems: "center", gap: 10, background: C.surface, border: `1px solid ${personaTheme.border}`, borderRadius: 16, padding: "6px 10px", transition: personaTheme.transition }}>
+                            <button style={{ background: "none", border: "none", color: C.textDim, cursor: "pointer", padding: 6, borderRadius: 6, display: "flex", transition: personaTheme.transition }} title="Attach Document"
+                                onMouseEnter={e => { e.currentTarget.style.color = personaTheme.primary; e.currentTarget.style.background = personaTheme.glow; }}
                                 onMouseLeave={e => { e.currentTarget.style.color = C.textDim; e.currentTarget.style.background = "none"; }}
                                 onClick={() => fileInputRef.current?.click()}
                             >
@@ -619,14 +670,14 @@ function ChatLayoutInner({ children }) {
                                 value={message}
                                 onChange={e => { setMessage(e.target.value); autoGrow(e); }}
                                 onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
-                                placeholder="Message Sortix..."
+                                placeholder="Message Sortix AI..."
                                 rows={1}
                                 style={{ flex: 1, background: "none", border: "none", outline: "none", color: C.text, fontSize: 14, fontFamily: "'Sora',sans-serif", resize: "none", padding: "8px 4px", minHeight: 36, maxHeight: 120 }}
                             />
                             <button onClick={sendMessage} disabled={isSending}
-                                style={{ width: 36, height: 36, borderRadius: 10, background: isSending ? C.surface2 : C.orange, border: "none", cursor: isSending ? "wait" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, transition: "all 0.2s" }}
-                                onMouseEnter={e => { if (!isSending) { e.currentTarget.style.background = "#f07d55"; e.currentTarget.style.boxShadow = "0 2px 12px rgba(232,115,74,0.4)"; } }}
-                                onMouseLeave={e => { if (!isSending) { e.currentTarget.style.background = C.orange; e.currentTarget.style.boxShadow = "none"; } }}
+                                style={{ width: 36, height: 36, borderRadius: 10, background: isSending ? C.surface2 : personaTheme.primary, border: "none", cursor: isSending ? "wait" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, transition: personaTheme.transition }}
+                                onMouseEnter={e => { if (!isSending) { e.currentTarget.style.opacity = 0.9; e.currentTarget.style.boxShadow = `0 2px 12px ${personaTheme.glow}`; } }}
+                                onMouseLeave={e => { if (!isSending) { e.currentTarget.style.opacity = 1; e.currentTarget.style.boxShadow = "none"; } }}
                                 onMouseDown={e => { if (!isSending) e.currentTarget.style.transform = "scale(0.9)"; }}
                                 onMouseUp={e => { if (!isSending) e.currentTarget.style.transform = "scale(1)"; }}
                             >

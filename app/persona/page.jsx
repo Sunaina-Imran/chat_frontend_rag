@@ -10,35 +10,36 @@ const FIELD_GROUPS = [
   { label: "Profession", key: "profession", placeholder: "e.g., Lawyer, Teacher, Developer", required: true },
   { label: "Purpose", key: "purpose", placeholder: "Why do you want to use this chatbot?", textarea: true, required: true },
   { label: "Domain", key: "domain", placeholder: "e.g., Legal, Education, Finance, Tech" },
-  { 
+  {
     label: "Knowledge Level", key: "knowledge_level", type: "select",
-    options: ["Beginner", "Intermediate", "Expert"] 
+    options: ["Beginner", "Intermediate", "Expert"]
   },
-  { 
+  {
     label: "Preferred Language", key: "preferred_language", type: "select",
-    options: ["English", "Spanish", "French", "German", "Chinese", "Japanese", "Arabic", "Other"] 
+    options: ["English", "Spanish", "French", "German", "Chinese", "Japanese", "Arabic", "Other"]
   },
-  { 
+  {
     label: "Tone", key: "tone", type: "select",
-    options: ["Professional", "Friendly", "Formal", "Casual", "Humorous", "Direct"] 
+    options: ["Professional", "Friendly", "Formal", "Casual", "Humorous", "Direct"]
   },
-  { 
+  {
     label: "Answer Style", key: "answer_style", type: "select",
-    options: ["Detailed", "Short", "Step-by-step", "Analytical", "Conversational"] 
+    options: ["Detailed", "Short", "Step-by-step", "Analytical", "Conversational"]
   },
-  { 
+  {
     label: "Output Format", key: "output_format", type: "select",
-    options: ["Paragraphs", "Bullet points", "Table", "JSON", "Markdown"] 
+    options: ["Paragraphs", "Bullet points", "Table", "JSON", "Markdown"]
   },
-  { 
+  {
     label: "Citation Preference", key: "citation_preference", type: "select",
-    options: ["Cite relevant document sections", "Provide sources at the end", "No citations needed"] 
+    options: ["Cite relevant document sections", "Provide sources at the end", "No citations needed"]
   },
-  { 
+  {
     label: "Document Behavior", key: "document_behavior", type: "select",
-    options: ["Use uploaded documents first", "Strictly use only uploaded documents", "Mix documents with general knowledge"] 
+    options: ["Use uploaded documents first", "Strictly use only uploaded documents", "Mix documents with general knowledge"]
   },
   { label: "Restrictions", key: "restrictions", placeholder: "Any safety or behavior limits?", textarea: true },
+  { label: "Persona Theme Color", key: "color", type: "color" },
 ];
 
 const DEFAULTS = {
@@ -54,6 +55,7 @@ const DEFAULTS = {
   citation_preference: "Cite relevant document sections",
   document_behavior: "Use uploaded documents first",
   restrictions: "",
+  color: "#F97316",
 };
 
 const styles = {
@@ -187,7 +189,7 @@ export default function PersonaPage() {
 
         <div style={styles.card}>
           <div style={styles.logo}><SortixLogo size={64} /></div>
-          <div style={styles.title}>Craft Your Unique Persona</div>
+          <div style={styles.title}>Design Your Smart Assistant</div>
           <div style={styles.sub}>Customize how your AI understands and interacts with you.</div>
 
           <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
@@ -224,6 +226,24 @@ export default function PersonaPage() {
                     onFocus={() => setFocusedField(field.key)}
                     onBlur={() => setFocusedField(null)}
                   />
+                ) : field.type === "color" ? (
+                  <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                    <div style={{ position: "relative", width: 44, height: 44, borderRadius: 12, overflow: "hidden", border: "1px solid rgba(255,255,255,0.12)", flexShrink: 0 }}>
+                      <input
+                        type="color"
+                        value={form[field.key]}
+                        onChange={(e) => handleChange(field.key, e.target.value)}
+                        style={{ position: "absolute", top: -5, left: -5, width: 60, height: 60, cursor: "pointer", border: "none", background: "none" }}
+                      />
+                    </div>
+                    <input
+                      type="text"
+                      value={form[field.key]}
+                      onChange={(e) => handleChange(field.key, e.target.value)}
+                      style={{ ...styles.input, flex: 1 }}
+                      placeholder="#HEXCODE"
+                    />
+                  </div>
                 ) : (
                   <input
                     type="text"
@@ -258,10 +278,10 @@ export default function PersonaPage() {
                 type="submit"
                 disabled={loading}
                 style={{ ...styles.btn, flex: 2, opacity: loading ? 0.7 : 1, cursor: loading ? "wait" : "pointer" }}
-                onMouseEnter={e => { if(!loading) { e.target.style.background = "#f07d55"; e.target.style.boxShadow = "0 4px 20px rgba(232,115,74,0.35)"; } }}
-                onMouseLeave={e => { if(!loading) { e.target.style.background = "#e8734a"; e.target.style.boxShadow = "none"; } }}
-                onMouseDown={e => { if(!loading) { e.target.style.transform = "scale(0.98)"; } }}
-                onMouseUp={e => { if(!loading) { e.target.style.transform = "scale(1)"; } }}
+                onMouseEnter={e => { if (!loading) { e.target.style.background = "#f07d55"; e.target.style.boxShadow = "0 4px 20px rgba(232,115,74,0.35)"; } }}
+                onMouseLeave={e => { if (!loading) { e.target.style.background = "#e8734a"; e.target.style.boxShadow = "none"; } }}
+                onMouseDown={e => { if (!loading) { e.target.style.transform = "scale(0.98)"; } }}
+                onMouseUp={e => { if (!loading) { e.target.style.transform = "scale(1)"; } }}
               >
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10 }}>
                   {loading && (

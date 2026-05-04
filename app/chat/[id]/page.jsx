@@ -90,6 +90,8 @@ const MD_STYLES = `
     }
 `;
 
+import Message from "@/components/Message";
+
 const ChildChatComponent = () => {
     const [messages, setMessages] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -98,7 +100,7 @@ const ChildChatComponent = () => {
     const params = useParams();
     const chatId = params.id;
 
-    const { refreshToken } = useChatRefresh();
+    const { refreshKey, personaTheme } = useChatRefresh();
 
     const getMessages = async () => {
         if (!chatId) return;
@@ -116,7 +118,7 @@ const ChildChatComponent = () => {
 
     useEffect(() => {
         getMessages();
-    }, [chatId, refreshToken]);
+    }, [chatId, refreshKey]);
 
     useEffect(() => {
         scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
@@ -139,22 +141,11 @@ const ChildChatComponent = () => {
                         display: "flex", alignItems: "center", justifyContent: "center",
                     }}
                 >
-                    <SortixLogo size={112} />
+                    <SortixLogo size={112} color={personaTheme.primary} />
                 </div>
                 <p style={{ fontSize: 15, fontWeight: 500, color: C.textDim, margin: 0 }}>
                     Loading conversation…
                 </p>
-                <div style={{ display: "flex", flexDirection: "column", gap: 10, width: "100%", maxWidth: 340, marginTop: 8 }}>
-                    {[100, 75, 90].map((w, i) => (
-                        <div key={i} style={{
-                            width: `${w}%`, height: 14, borderRadius: 7,
-                            background: `linear-gradient(90deg,${C.surface} 25%,${C.surface2} 50%,${C.surface} 75%)`,
-                            backgroundSize: "200% 100%",
-                            animation: `naina-shimmer 1.5s ease-in-out infinite`,
-                            animationDelay: `${i * 0.15}s`,
-                        }} />
-                    ))}
-                </div>
             </div>
         );
     }
@@ -171,12 +162,11 @@ const ChildChatComponent = () => {
                 }}
             >
                 <style>{MD_STYLES}</style>
-                <SortixLogo size={112} />
+                <SortixLogo size={112} color={personaTheme.primary} />
                 <p style={{ fontSize: 20, fontWeight: 600, color: C.text, margin: 0 }}>Let's start!</p>
                 <p style={{ fontSize: 13, color: C.textMuted, textAlign: "center", maxWidth: 260, lineHeight: 1.7, margin: 0 }}>
-                    Hi! I'm Sortix — your intelligent assistant. Send a message to begin.
+                    Hi! I'm Sortix AI — your intelligent assistant. Send a message to begin.
                 </p>
-
             </div>
         );
     }
@@ -188,97 +178,18 @@ const ChildChatComponent = () => {
             style={{
                 height: "100%", background: C.bg2,
                 padding: "24px 20px 10px",
-                display: "flex", flexDirection: "column", gap: 20,
+                display: "flex", flexDirection: "column", gap: 24,
                 overflowY: "auto", fontFamily: "'Sora', sans-serif",
-                scrollBehavior: "smooth"
+                scrollBehavior: "smooth",
+                transition: personaTheme.transition
             }}
         >
             <style>{MD_STYLES}</style>
-
-            {messages.map((msg, idx) => {
-                const isUser = msg.role === "user";
-                const sources = msg.sources || [];
-                return (
-                    <div
-                        key={idx}
-                        style={{
-                            display: "flex", alignItems: "flex-end", gap: 10,
-                            flexDirection: isUser ? "row-reverse" : "row",
-                            animation: "msgIn .3s ease forwards",
-                        }}
-                    >
-                        {/* Avatar */}
-                        <div style={{
-                            width: 32, height: 32, borderRadius: "50%", flexShrink: 0,
-                            background: isUser ? "linear-gradient(135deg,#8a1f0e,#e8734a)" : "transparent",
-                            color: "#fff",
-                            display: "flex", alignItems: "center", justifyContent: "center",
-                            fontSize: 13, fontWeight: 600,
-                        }}>
-                            {isUser ? "U" : (
-                                <SortixLogo size={32} />
-                            )}
-                        </div>
-
-                        {/* Bubble + Sources */}
-                        <div style={{ maxWidth: "76%", display: "flex", flexDirection: "column", gap: 6, alignItems: isUser ? "flex-end" : "flex-start" }}>
-                            <div style={{
-                                padding: "12px 16px",
-                                borderRadius: 12,
-                                borderBottomRightRadius: isUser ? 4 : 12,
-                                borderBottomLeftRadius: isUser ? 12 : 4,
-                                background: isUser ? C.orange : C.surface,
-                                color: isUser ? "#fff" : C.text,
-                                border: isUser ? "none" : `1px solid ${C.border2}`,
-                                wordBreak: "break-word",
-                            }}>
-                                {isUser ? (
-                                    /* User messages: plain text */
-                                    <span style={{ fontSize: 14, lineHeight: 1.6 }}>{msg.content}</span>
-                                ) : (
-                                    /* AI messages: full markdown rendering */
-                                    <div className="md-prose">
-                                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                                            {msg.content}
-                                        </ReactMarkdown>
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Source citations for assistant messages */}
-                            {!isUser && sources.length > 0 && (
-                                <div style={{
-                                    display: "flex", flexWrap: "wrap", gap: 6,
-                                    paddingLeft: 4, marginTop: 4,
-                                }}>
-                                    {sources.map((src, sidx) => (
-                                        <div
-                                            key={sidx}
-                                            title={src.text_excerpt || src.source}
-                                            style={{
-                                                fontSize: 10, color: C.orange,
-                                                background: C.orangeGlow,
-                                                border: `1px solid ${C.orangeGlow2}`,
-                                                borderRadius: 12,
-                                                padding: "3px 8px",
-                                                cursor: "help",
-                                                maxWidth: 200,
-                                                overflow: "hidden",
-                                                textOverflow: "ellipsis",
-                                                whiteSpace: "nowrap",
-                                                fontFamily: "monospace"
-                                            }}
-                                        >
-                                            [{src.reference_id}] {src.source}
-                                            {src.page ? ` p.${src.page}` : ""}
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                );
-            })}
+            <div className="max-w-4xl mx-auto w-full flex flex-col gap-8 pb-10">
+                {messages.map((msg, idx) => (
+                    <Message key={idx} message={msg} />
+                ))}
+            </div>
         </div>
     );
 };

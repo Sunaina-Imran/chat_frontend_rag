@@ -73,7 +73,7 @@ export default function Home() {
             <SortixLogo size={112} style={{ animation: "pulse 2s infinite ease-in-out" }} />
 
             <p style={{ fontSize: 16, fontWeight: 600, color: "#f0ece6", margin: 0, letterSpacing: "0.02em" }}>
-                Starting Sortix…
+                Starting Sortix AI…
             </p>
 
             {/* Spinner — Orange themed */}

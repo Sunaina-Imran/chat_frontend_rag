@@ -140,7 +140,7 @@ export default function LoginPage() {
         <div style={styles.card}>
           <div style={styles.logo}><SortixLogo size={64} /></div>
           <div style={styles.title}>{isSignup ? "Create account" : "Welcome back"}</div>
-          <div style={styles.sub}>{isSignup ? "Sign up for a Sortix account" : "Sign in to your Sortix account"}</div>
+          <div style={styles.sub}>{isSignup ? "Sign up for a Sortix AI account" : "Sign in to your Sortix AI account"}</div>
 
           <form onSubmit={handleSubmit}>
             <div style={styles.inputGroup}>

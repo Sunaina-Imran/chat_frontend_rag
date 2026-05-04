@@ -6,11 +6,13 @@ import { addOptimisticMessage, sendMessage } from "@/store/chatSlice";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { SendHorizonal, Loader2 } from "lucide-react";
+import { useChatRefresh } from "@/app/chat/ChatRefreshContext";
 
 export default function InputBox({ chatId }) {
   const [text, setText] = useState("");
   const dispatch = useDispatch();
   const isSending = useSelector((state) => state.chat.isSending);
+  const { personaColor } = useChatRefresh();
 
   const handleSend = (e) => {
     e.preventDefault();
@@ -38,7 +40,11 @@ export default function InputBox({ chatId }) {
       <Button 
         type="submit" 
         size="icon" 
-        className="absolute right-2 rounded-lg"
+        className="absolute right-2 rounded-lg transition-all duration-300"
+        style={{ 
+          background: personaColor,
+          opacity: (!text.trim() || isSending) ? 0.5 : 1
+        }}
         disabled={!text.trim() || isSending}
       >
         {isSending ? <Loader2 size={18} className="animate-spin" /> : <SendHorizonal size={18} />}

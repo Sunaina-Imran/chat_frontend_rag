@@ -16,7 +16,7 @@ const dmSans = DM_Sans({
 });
 
 export const metadata = {
-  title: "SKbot AI",
+  title: "Sortix AI",
   description: "A warm, thoughtful AI companion",
 };
 
