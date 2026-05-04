@@ -85,7 +85,7 @@ function ChatLayoutInner({ children }) {
 
     const getAllChats = async () => {
         try {
-            const res = await api.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/chat/sessions`);
+            const res = await api.get(`/chat/sessions`);
             setChats(res.data || []);
         } catch (err) {
             console.error(err);
@@ -101,7 +101,7 @@ function ChatLayoutInner({ children }) {
     const handleDeleteChat = async (e, sessionId) => {
         e.stopPropagation();
         try {
-            await api.delete(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/chat/session/${sessionId}`);
+            await api.delete(`/chat/session/${sessionId}`);
             await getAllChats();
             if (sessionId === chatId) router.push("/chat");
         } catch (err) {
@@ -114,8 +114,8 @@ function ChatLayoutInner({ children }) {
         if (!effectiveChatId) return;
         try {
             const [listRes, statsRes] = await Promise.all([
-                api.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/documents/list?chat_id=${effectiveChatId}`),
-                api.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/documents/stats?chat_id=${effectiveChatId}`),
+                api.get(`/documents/list?chat_id=${effectiveChatId}`),
+                api.get(`/documents/stats?chat_id=${effectiveChatId}`),
             ]);
             setDocs(listRes.data || []);
             setDocStats(statsRes.data);
@@ -134,7 +134,7 @@ function ChatLayoutInner({ children }) {
         try {
             const form = new FormData();
             form.append("file", file);
-            await api.post(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/documents/upload?chat_id=${effectiveChatId}`, form, {
+            await api.post(`/documents/upload?chat_id=${effectiveChatId}`, form, {
                 headers: { "Content-Type": "multipart/form-data" },
             });
             await Promise.all([fetchDocs(), fetchAllDocsCount()]);
@@ -149,7 +149,7 @@ function ChatLayoutInner({ children }) {
     const handleDeleteDoc = async (docId) => {
         if (!effectiveChatId) return;
         try {
-            await api.delete(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/documents/${docId}?chat_id=${effectiveChatId}`);
+            await api.delete(`/documents/${docId}?chat_id=${effectiveChatId}`);
             await Promise.all([fetchDocs(), fetchAllDocsCount()]);
         } catch (err) {
             if (err.response?.status === 404) {
@@ -163,7 +163,7 @@ function ChatLayoutInner({ children }) {
 
     const fetchAllDocsCount = async () => {
         try {
-            const res = await api.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/documents/list`);
+            const res = await api.get(`/documents/list`);
             setAllDocsCount(res.data?.length || 0);
         } catch (err) {
             console.error("All docs count error", err);
@@ -177,7 +177,7 @@ function ChatLayoutInner({ children }) {
     // Load personas
     const fetchPersonas = async () => {
         try {
-            const res = await api.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/personas`);
+            const res = await api.get(`/personas`);
             setPersonas(res.data || []);
         } catch (err) {
             console.error("Failed to load personas", err);
@@ -198,7 +198,7 @@ function ChatLayoutInner({ children }) {
                 return;
             }
             try {
-                const res = await api.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/chat/history/${chatId}`);
+                const res = await api.get(`/chat/history/${chatId}`);
                 setSelectedPersonaId(res.data.persona_id || null);
             } catch (err) {
                 console.error("Failed to load session persona", err);
@@ -227,7 +227,7 @@ function ChatLayoutInner({ children }) {
         const saveSessionPersona = async () => {
             if (!chatId) return;
             try {
-                await api.put(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/chat/session/${chatId}/persona`, {
+                await api.put(`/chat/session/${chatId}/persona`, {
                     persona_id: selectedPersonaId,
                 });
             } catch (err) {
@@ -249,7 +249,7 @@ function ChatLayoutInner({ children }) {
                 return;
             }
             try {
-                const res = await api.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/chat/history/${chatId}`);
+                const res = await api.get(`/chat/history/${chatId}`);
                 setSelectedDocs(res.data.doc_ids || []);
             } catch (err) {
                 console.error("Failed to load session doc_ids", err);
@@ -264,7 +264,7 @@ function ChatLayoutInner({ children }) {
         const saveSessionDocs = async () => {
             if (!chatId) return;
             try {
-                await api.put(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/chat/session/${chatId}/docs`, {
+                await api.put(`/chat/session/${chatId}/docs`, {
                     doc_ids: selectedDocs,
                 });
             } catch (err) {
