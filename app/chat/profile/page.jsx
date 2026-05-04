@@ -15,7 +15,9 @@ const C = {
 const inputStyle = {
     width: "100%",
     background: C.surface2,
-    border: `1px solid ${C.border2}`,
+    borderWidth: "1px",
+    borderStyle: "solid",
+    borderColor: C.border2,
     borderRadius: 8,
     padding: "12px 16px",
     color: C.text,
@@ -241,7 +243,7 @@ export default function ProfilePage() {
                                 {personas.length === 0 && (
                                     <tr>
                                         <td colSpan="4" style={{ padding: "40px", textAlign: "center", color: C.textDim, fontSize: 14, fontWeight: 500 }}>
-                                            No personas created yet. Click "Add Persona" to create one.
+                                            No personas created yet. Click &quot;Add Persona&quot; to create one.
                                         </td>
                                     </tr>
                                 )}

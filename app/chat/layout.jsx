@@ -46,8 +46,6 @@ function ChatLayoutInner({ children }) {
     const [personas, setPersonas] = useState([]);
     const [selectedPersonaId, setSelectedPersonaId] = useState(null);
 
-    // ── Temp chat state ──
-    const [tempChatId, setTempChatId] = useState(null);
 
     useEffect(() => {
         if (!initialized.current) {
@@ -64,7 +62,7 @@ function ChatLayoutInner({ children }) {
     const router = useRouter();
     const pathname = usePathname();
     const chatId = pathname.split("/")[2];
-    const effectiveChatId = chatId || tempChatId;
+    const effectiveChatId = chatId;
 
     // Auth guard
     const [user, setUser] = useState(null);
@@ -95,20 +93,9 @@ function ChatLayoutInner({ children }) {
         }
     };
 
-    const handleNewChat = async () => {
-        if (isCreating) return;
-        setIsCreating(true);
-        try {
-            setTempChatId(crypto.randomUUID());
-            setSelectedDocs([]);
-            if (pathname !== "/chat") {
-                router.push("/chat");
-            }
-        } catch (err) {
-            console.error(err);
-        } finally {
-            setIsCreating(false);
-        }
+    const handleNewChat = () => {
+        const newId = crypto.randomUUID();
+        router.push(`/chat/${newId}`);
     };
 
     const handleDeleteChat = async (e, sessionId) => {
@@ -253,12 +240,6 @@ function ChatLayoutInner({ children }) {
         }
     }, [selectedPersonaId, chatId]);
 
-    // Generate temp chat ID when at /chat (no real session yet)
-    useEffect(() => {
-        if (!chatId && !tempChatId) {
-            setTempChatId(crypto.randomUUID());
-        }
-    }, [chatId, tempChatId]);
 
     // Load saved doc_ids for current chat session
     useEffect(() => {
@@ -305,16 +286,18 @@ function ChatLayoutInner({ children }) {
         setIsSending(true);
 
         try {
-            // If this is a temp chat (not yet persisted), create the session first
-            if (!chatId && tempChatId) {
-                await api.post(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/chat/session`, {
-                    session_id: tempChatId,
+            // Check if this is a new session (not in our sidebar list)
+            const isNewSession = !chats.some(c => c.session_id === effectiveChatId);
+
+            if (isNewSession) {
+                await api.post('/chat/session', {
+                    session_id: effectiveChatId,
                     title: message.trim().slice(0, 50),
                     persona_id: selectedPersonaId || undefined,
                 });
             }
 
-            await api.post(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/chat/message`, {
+            await api.post('/chat/message', {
                 session_id: effectiveChatId,
                 message: message,
                 doc_ids: selectedDocs.length > 0 ? selectedDocs : undefined,
@@ -324,17 +307,14 @@ function ChatLayoutInner({ children }) {
             });
 
             setMessage("");
-            // Reset textarea height if possible
+            // Reset textarea height
             const ta = document.getElementById("chat-textarea");
             if (ta) { ta.style.height = "auto"; }
 
-            if (!chatId && tempChatId) {
-                // First message in temp chat: refresh sidebar and navigate to real session
+            if (isNewSession) {
                 await getAllChats();
-                router.replace(`/chat/${tempChatId}`);
-            } else {
-                triggerRefresh();
             }
+            triggerRefresh();
         } catch (err) {
             console.error(err);
         } finally {
@@ -421,7 +401,7 @@ function ChatLayoutInner({ children }) {
                         {chatId && (
                             <div style={{ padding: "0 14px 6px" }}>
                                 <div style={{ fontSize: 10, fontWeight: 600, color: C.textDim, textTransform: "uppercase", letterSpacing: "0.09em", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                                    Attached to "{currentChatTitle}"
+                                    Attached to &quot;{currentChatTitle}&quot;
                                 </div>
                             </div>
                         )}
@@ -539,13 +519,13 @@ function ChatLayoutInner({ children }) {
                     {chats.map((chat) => {
                         const sid = chat.session_id;
                         const isActive = sid === chatId;
-                        
+
                         return (
-                            <div key={sid} onClick={() => router.push(`/chat/${sid}`)} className="group" style={{ 
-                                display: "flex", alignItems: "center", gap: 8, padding: "8px 10px", borderRadius: 10, cursor: "pointer", 
-                                background: isActive ? C.surface : "transparent", 
-                                border: isActive ? `1px solid ${C.border2}` : "1px solid transparent", 
-                                transition: "all .12s" 
+                            <div key={sid} onClick={() => router.push(`/chat/${sid}`)} className="group" style={{
+                                display: "flex", alignItems: "center", gap: 8, padding: "8px 10px", borderRadius: 10, cursor: "pointer",
+                                background: isActive ? C.surface : "transparent",
+                                border: isActive ? `1px solid ${C.border2}` : "1px solid transparent",
+                                transition: "all .12s"
                             }}
                                 onMouseEnter={e => { if (!isActive) e.currentTarget.style.background = C.surface2; }}
                                 onMouseLeave={e => { if (!isActive) e.currentTarget.style.background = "transparent"; }}
@@ -584,16 +564,16 @@ function ChatLayoutInner({ children }) {
 
             <main style={{ flex: 1, display: "flex", flexDirection: "column", background: C.bg2, minWidth: 0 }}>
                 {pathname !== "/chat/profile" && (
-                    <div style={{ 
-                        padding: "14px 20px", 
-                        borderBottom: `1px solid ${C.border}`, 
-                        display: "flex", alignItems: "center", gap: 12, 
+                    <div style={{
+                        padding: "14px 20px",
+                        borderBottom: `1px solid ${C.border}`,
+                        display: "flex", alignItems: "center", gap: 12,
                         background: C.bg2,
                         position: "relative"
                     }}>
                         {/* Persona Color Accent Border */}
-                        <div style={{ 
-                            position: "absolute", bottom: -1, left: 0, right: 0, height: 2, 
+                        <div style={{
+                            position: "absolute", bottom: -1, left: 0, right: 0, height: 2,
                             background: `linear-gradient(90deg, transparent, ${personaTheme.primary}, transparent)`,
                             opacity: selectedPersona ? 1 : 0,
                             transition: personaTheme.transition
@@ -608,8 +588,25 @@ function ChatLayoutInner({ children }) {
                         )}
                         <SortixLogo size={32} color={personaTheme.primary} />
                         <div>
-                            <div style={{ fontSize: 14, fontWeight: 600 }}>
-                                {selectedPersona ? selectedPersona.persona_name : "Sortix AI"}
+                            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                                <div style={{ fontSize: 14, fontWeight: 600 }}>
+                                    {selectedPersona ? selectedPersona.persona_name : "Sortix AI"}
+                                </div>
+                                {effectiveChatId && (
+                                    <div style={{
+                                        fontSize: 10,
+                                        fontWeight: 500,
+                                        color: C.textDim,
+                                        background: C.surface,
+                                        padding: "2px 8px",
+                                        borderRadius: 6,
+                                        border: `1px solid ${C.border2}`,
+                                        fontFamily: "monospace",
+                                        letterSpacing: "0.02em"
+                                    }}>
+                                        ID: {effectiveChatId.slice(0, 8)}...
+                                    </div>
+                                )}
                             </div>
                             <div style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 11, color: personaTheme.primary }}>
                                 <div style={{ width: 6, height: 6, borderRadius: "50%", background: personaTheme.primary, animation: "naina-pulse 2s infinite" }} />
@@ -620,15 +617,15 @@ function ChatLayoutInner({ children }) {
                         <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 8 }}>
                             {personas.length > 0 && (
                                 <div style={{ position: "relative" }}>
-                                    <select 
-                                        value={selectedPersonaId || ""} 
+                                    <select
+                                        value={selectedPersonaId || ""}
                                         onChange={(e) => setSelectedPersonaId(e.target.value || null)}
-                                        style={{ 
-                                            background: personaTheme.glow, 
-                                            border: `1px solid ${personaTheme.border}`, 
-                                            borderRadius: 20, padding: "6px 28px 6px 12px", 
-                                            color: personaTheme.primary, 
-                                            fontSize: 12, fontWeight: 600, fontFamily: "'Sora', sans-serif", 
+                                        style={{
+                                            background: personaTheme.glow,
+                                            border: `1px solid ${personaTheme.border}`,
+                                            borderRadius: 20, padding: "6px 28px 6px 12px",
+                                            color: personaTheme.primary,
+                                            fontSize: 12, fontWeight: 600, fontFamily: "'Sora', sans-serif",
                                             cursor: "pointer", appearance: "none", outline: "none",
                                             transition: personaTheme.transition
                                         }}
@@ -704,7 +701,7 @@ function ChatLayoutInner({ children }) {
                         <div style={{ fontSize: 32, marginBottom: 16 }}>👋</div>
                         <h3 style={{ fontSize: 24, fontWeight: 700, color: "#fff", margin: "0 0 12px 0", fontFamily: "'Sora', sans-serif" }}>Sign out?</h3>
                         <p style={{ fontSize: 15, color: C.textMuted, margin: "0 0 32px 0", lineHeight: 1.5, fontFamily: "'Sora', sans-serif" }}>
-                            You'll need to sign back in to continue chatting.
+                            You&apos;ll need to sign back in to continue chatting.
                         </p>
                         <div style={{ display: "flex", gap: 16, width: "100%" }}>
                             <button

@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { FileText, MapPin, Target, ExternalLink } from 'lucide-react';
+import { FileText, MapPin, Target } from 'lucide-react';
 
 /**
  * Individual Source Card component

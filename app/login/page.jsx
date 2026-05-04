@@ -58,7 +58,9 @@ const styles = {
   },
   input: {
     width: "100%", background: "#221f1a",
-    border: "1px solid rgba(255,255,255,0.12)",
+    borderWidth: "1px",
+    borderStyle: "solid",
+    borderColor: "rgba(255,255,255,0.12)",
     borderRadius: 12, padding: "13px 14px 13px 42px",
     fontSize: 14, fontFamily: "'Sora', sans-serif",
     color: "#f0ece6", outline: "none",

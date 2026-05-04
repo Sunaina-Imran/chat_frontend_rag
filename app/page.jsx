@@ -37,9 +37,8 @@ export default function Home() {
                     // Go straight to the most-recent chat
                     router.replace(`/chat/${res.data[0].session_id}`);
                 } else {
-                    // No existing chats — create one and navigate to it
-                    const newSession = await api.post("/chat/session");
-                    router.replace(`/chat/${newSession.data.session_id}`);
+                    // No existing chats — navigate to a temporary UUID session
+                    router.replace(`/chat/${crypto.randomUUID()}`);
                 }
             } catch {
                 // If backend is unreachable, fall back to the chat list page
